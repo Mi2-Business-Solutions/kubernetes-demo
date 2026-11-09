@@ -1,0 +1,39 @@
+# Specifies the Kubernetes API version used to create this resource.
+apiVersion: apps/v1
+# Specifies the type of Kubernetes resource we want to create.
+# Here, we are creating a Deployment.
+kind: Deployment
+# Contains information that identifies the Deployment.
+metadata:
+  # Name of this Deployment.
+  name: auth-deployment
+  # Namespace in which this Deployment will be created.
+  namespace: gamehub
+# Defines the desired state of the Deployment.
+spec:
+  # Specifies how many identical Pod replicas we want Kubernetes to maintain.
+  # Here, Kubernetes will try to keep one Auth Pod running.
+  replicas: 1
+  # Defines how this Deployment identifies the Pods it manages.
+  selector:
+    matchLabels:
+      # The Deployment manages Pods having this label.
+      app: auth-service
+  # Defines the template Kubernetes uses to create the Pods.
+  template:
+    metadata:
+      # Assigns labels to the Pods created using this template.
+      # These labels must match the selector defined above.
+      labels:
+        app: auth-service
+    # Defines the specification of the Pod.
+    spec:
+      # Lists the containers that will run inside this Pod.
+      containers:
+        - name: auth
+          # Docker image used to create the Auth container.
+          # Kubernetes pulls this image from Docker Hub if it is not available locally.
+          image: lakshmisaranya/gamehub:auth-v1
+          # Specifies the port on which the Auth application listens inside the container.
+          ports:
+            - containerPort: 8080

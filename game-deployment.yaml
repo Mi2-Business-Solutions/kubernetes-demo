@@ -1,0 +1,41 @@
+# Specifies the Kubernetes API version used to create this resource.
+apiVersion: apps/v1
+# Specifies the type of Kubernetes resource we want to create.
+# Here, we are creating a Deployment.
+kind: Deployment
+# Contains information that identifies the Deployment.
+metadata:
+  # Name of the Deployment.
+  name: game-deployment
+  # Namespace in which this Deployment will be created.
+  namespace: gamehub
+# Defines the desired state of the Deployment.
+spec:
+  # Specifies the desired number of Game Pod replicas.
+  # Kubernetes will try to maintain one running Pod.
+  replicas: 1
+  # Identifies which Pods this Deployment should manage.
+  # It looks for Pods having the label app: game-service.
+  selector:
+    matchLabels:
+      app: game-service
+  # Defines the template Kubernetes uses to create Game Pods.
+  template:
+    metadata:
+      # Labels assigned to each Pod created by this Deployment.
+      # These labels must match the Deployment selector above.
+      labels:
+        app: game-service
+    # Defines the specification of the Pod.
+    spec:
+      containers:
+        # Name of the container running inside the Game Pod.
+        - name: game
+          # Docker image used to create the Game container.
+          # Kubernetes pulls this image from Docker Hub if it is not
+          # already available in the Minikube container runtime.
+          image: lakshmisaranya/gamehub:game-v1
+          ports:
+            # Port on which the Game application listens inside the container.
+            # The Game Service forwards traffic to this port.
+            - containerPort: 8081

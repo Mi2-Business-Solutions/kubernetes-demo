@@ -1,0 +1,25 @@
+# Specifies the Kubernetes API version used to create this resource.
+apiVersion: v1
+# Specifies the type of Kubernetes resource we want to create.
+# Here, we are creating a PersistentVolumeClaim.
+kind: PersistentVolumeClaim
+# Contains information that identifies the PersistentVolumeClaim.
+metadata:
+  # Name of the PersistentVolumeClaim.
+  name: postgres-pvc
+  # Namespace in which this PersistentVolumeClaim will be created.
+  namespace: gamehub
+# Defines the storage requirements requested by this PVC.
+spec:
+  # Specifies how the requested storage can be accessed.
+  accessModes:
+    # ReadWriteOnce means the volume can be mounted as read-write
+    # by a single node at a time.
+    # Multiple Pods on that same node may be able to use it,
+    # depending on the volume type and configuration.
+    - ReadWriteOnce
+  # Defines the amount of storage requested.
+  resources:
+    requests:
+      # Requests 1 GiB of persistent storage for PostgreSQL data.+
+      storage: 1Gi

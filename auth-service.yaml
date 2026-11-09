@@ -1,0 +1,28 @@
+# Specifies the Kubernetes API version used to create this resource.
+apiVersion: v1
+# Specifies the type of Kubernetes resource we want to create.
+# Here, we are creating a Service.
+kind: Service
+# Contains information that identifies the Service.
+metadata:
+  # Name of the Service.
+  name: auth-service
+  # Namespace in which this Service will be created.
+  namespace: gamehub
+# Defines how the Service should behave.
+spec:
+  # ClusterIP exposes the Service using an internal IP address within the Kubernetes cluster.
+  # It allows other resources inside the cluster to communicate with it.
+  type: ClusterIP
+  # Identifies which Pods should receive traffic from this Service.
+  # The Service looks for Pods having the label app: auth-service.
+  selector:
+    app: auth-service
+  # Defines the ports through which the Service handles traffic
+  ports:
+    - protocol: TCP
+      # Port on which the Service receives traffic inside the cluster.
+      port: 8080
+      # Port on which the Auth application listens inside the Pod.
+      # The Service forwards incoming traffic to this port.
+      targetPort: 8080

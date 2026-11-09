@@ -1,0 +1,138 @@
+# Specifies the Kubernetes API version used to create this resource.
+apiVersion: apps/v1
+# Specifies the type of Kubernetes resource we want to create.
+# Here, we are creating a Deployment.
+kind: Deployment
+# Contains information that identifies the Deployment.
+metadata:
+  # Name of the Deployment.
+  name: postgres
+  # Namespace in which this Deployment will be created.
+  namespace: gamehub
+# Defines the desired state of the Deployment.
+spec:
+  # Specifies the desired number of PostgreSQL Pod replicas.
+  # Kubernetes will try to maintain one running Pod.
+  replicas: 1
+  # Identifies which Pods this Deployment should manage.
+  # It looks for Pods having the label app: postgres.
+  selector:
+    matchLabels:
+      app: postgres
+  # Defines the template Kubernetes uses to create PostgreSQL Pods.
+  template:
+    metadata:
+      # Labels assigned to each Pod created by this Deployment.
+      # These labels must match the Deployment selector above.
+      labels:
+        app: postgres
+    # Defines the specification of the Pod.
+    spec:
+      containers:
+        # Name of the container running inside the PostgreSQL Pod.
+        - name: postgres
+          # PostgreSQL Docker image used to create the container.
+          image: postgres:13
+          ports:
+            # Port on which PostgreSQL listens inside the container.
+            # The PostgreSQL Service forwards traffic to this port.
+            - containerPort: 5432
+          # Defines environment variables required by PostgreSQL.
+          env:
+            # Database username.
+            - name: POSTGRES_USER
+              valueFrom:
+              # Retrieves the value from an existing Kubernetes Secret.
+                secretKeyRef:
+                  # Name of the Secret containing the database credentials.
+                  name: gamehub-db-secret
+                  # Key inside the Secret whose value should be retrieved.
+                  key: POSTGRES_USER
+            # Database password.
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  # Name of the Secret containing the database credentials.
+                  name: gamehub-db-secret
+                  # Key inside the Secret whose value should be retrieved.
+                  key: POSTGRES_PASSWORD
+            # Name of the database.
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  # Name of the Secret containing the database credentials.
+                  name: gamehub-db-secret
+                  # Key inside the Secret whose value should be retrieved.
+                  key: POSTGRES_DB
+          # Defines storage locations mounted inside the container.
+          volumeMounts:
+              # References the volume named postgres-storage below.
+            - name: postgres-storage
+             # Directory inside the container where PostgreSQL stores its data.
+              mountPath: /var/lib/postgresql/data
+            # References the volume named postgres-init below.
+            - name: postgres-init
+            # Directory where PostgreSQL looks for initialization scripts.
+            # SQL scripts mounted here are executed during initial database setup.
+              mountPath: /docker-entrypoint-initdb.d
+              # Prevents the container from modifying the mounted initialization files.
+              readOnly: true
+          # Checks whether PostgreSQL has started successfully.
+          # Until this probe succeeds, Kubernetes does not consider startup complete.
+          startupProbe:
+            exec:
+              # Runs pg_isready to check PostgreSQL availability.
+              command:
+                - pg_isready
+                - -U
+                - user
+                - -d
+                - gamehub
+            # Runs the startup check every 10 seconds.
+            periodSeconds: 10
+             # Allows up to 30 failed checks before Kubernetes considers startup unsuccessful.
+            failureThreshold: 30
+          # Checks whether PostgreSQL is ready to accept connections.
+          # If this probe fails, Kubernetes does not send Service traffic to this Pod.
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - user
+                - -d
+                - gamehub
+            # Runs the readiness check every 5 seconds.
+            periodSeconds: 5
+          # Checks whether PostgreSQL is still healthy.
+          # If this probe repeatedly fails, Kubernetes can restart the container.
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - user
+                - -d
+                - gamehub
+            # Runs the liveness check every 10 seconds.
+            periodSeconds: 10
+            # Waits 30 seconds before starting liveness checks.
+            initialDelaySeconds: 30
+      # Defines the volumes that will be made available to the Pod.
+      volumes:
+      # Defines the volume used for persistent PostgreSQL data.
+        - name: postgres-storage
+          persistentVolumeClaim:
+          # Connects this volume to the existing PostgreSQL PVC.
+            claimName: postgres-pvc
+      # Defines the volume used for PostgreSQL initialization scripts.
+        - name: postgres-init
+          configMap:
+          # Connects this volume to the existing ConfigMap.
+            name: postgres-init
+
+
+# Probe -	What does it check?
+# startupProbe -	Has PostgreSQL finished starting?
+# readinessProbe -	Can PostgreSQL accept connections?
+# livenessProbe -	Is PostgreSQL still responding, or should it be restarted?

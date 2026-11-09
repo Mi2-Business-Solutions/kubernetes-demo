@@ -1,0 +1,30 @@
+﻿# This ConfigMap contains the SQL initialization script for the PostgreSQL database used by the gamehub application.
+# Specifies the Kubernetes API version used to create this resource.
+apiVersion: v1
+data:
+  init.sql: "-- Create tables for auth-service\r\nCREATE TABLE IF NOT EXISTS users
+    (\r\n  id SERIAL PRIMARY KEY,\r\n  username VARCHAR(255) UNIQUE NOT NULL,\r\n
+    \ password_hash BYTEA NOT NULL\r\n);\r\n\r\n-- Create table for Snake game scores\r\nCREATE
+    TABLE IF NOT EXISTS snake_high_scores (\r\n  id SERIAL PRIMARY KEY,\r\n  user_id
+    INTEGER REFERENCES users(id),\r\n  score INTEGER DEFAULT 0\r\n);\r\n\r\n-- Create
+    table for other game stats (Tic-Tac-Toe and Rock-Paper-Scissors)\r\nCREATE TABLE
+    IF NOT EXISTS games_stats (\r\n  id SERIAL PRIMARY KEY,\r\n  user_id INTEGER REFERENCES
+    users(id),\r\n  game_type VARCHAR(50) NOT NULL,\r\n  wins INTEGER DEFAULT 0,\r\n
+    \ losses INTEGER DEFAULT 0\r\n);\r\n\r\n-- Grant all privileges on the tables
+    to the application user\r\nGRANT ALL PRIVILEGES ON TABLE users TO \"user\";\r\nGRANT
+    ALL PRIVILEGES ON TABLE snake_high_scores TO \"user\";\r\nGRANT ALL PRIVILEGES
+    ON TABLE games_stats TO \"user\";\r\n\r\nGRANT USAGE, SELECT ON ALL SEQUENCES
+    IN SCHEMA public TO \"user\";\r\n\r\n-- Add indexes to foreign key columns to
+    speed up JOINs\r\nCREATE INDEX IF NOT EXISTS idx_snake_high_scores_user_id ON
+    snake_high_scores(user_id);\r\nCREATE INDEX IF NOT EXISTS idx_games_stats_user_id
+    ON games_stats(user_id);\r\nCREATE INDEX IF NOT EXISTS idx_games_stats_game_type
+    ON games_stats(game_type);\r\n\r\n"
+
+# Specifies the type of Kubernetes resource we want to create.
+# Here, we are creating a ConfigMap.
+kind: ConfigMap
+metadata:
+  # Name of the ConfigMap.
+  name: postgres-init
+  # Namespace in which this ConfigMap will be created.
+  namespace: gamehub

@@ -1,20 +1,54 @@
+# Specifies the Kubernetes API version used to create this resource.
 apiVersion: apps/v1
+
+# Specifies the type of Kubernetes resource we want to create.
+# Here, we are creating a Deployment.
 kind: Deployment
+
+# Contains information that identifies the Deployment.
 metadata:
+  # Name of this Deployment.
   name: gamehub-frontend
+  # Namespace in which this Deployment will be created.
   namespace: gamehub
+# Defines the desired state of the Deployment.
 spec:
+  # Specifies how many identical Pod replicas we want Kubernetes to maintain.
+  # Here, Kubernetes will try to keep one frontend Pod running.
   replicas: 1
+  # Defines how this Deployment identifies the Pods it manages.
   selector:
     matchLabels:
+      # The Deployment manages Pods having this label.
       app: gamehub-frontend
+  # Defines the template Kubernetes uses to create the Pods.
   template:
     metadata:
+      # Assigns labels to the Pods created using this template.
+      # These labels must match the selector defined above.
       labels:
         app: gamehub-frontend
+     # Defines the specification of the Pod.
     spec:
+      # Lists the containers that will run inside this Pod.
+      # The initContainers section defines a container that runs before the main frontend container starts.
+      initContainers:
+        - name: wait-for-auth-service
+          image: busybox:1.36
+          command: 
+            - sh
+            - -c
+            - |
+              until nc -z auth-service 8080; do
+                echo "Waiting for auth-service to be available..."
+                sleep 2
+              done
+              echo "auth-service is available. Proceeding with frontend container startup."
       containers:
+        # Docker image used to create the frontend container.
+        # Kubernetes pulls this image from Docker Hub if it is not available locally.
         - name: frontend
           image: lakshmisaranya/gamehub:frontend-v1
+          # Specifies the port on which the frontend container listens.
           ports:
             - containerPort: 80
