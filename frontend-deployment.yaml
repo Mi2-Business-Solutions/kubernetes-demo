@@ -52,3 +52,19 @@ spec:
           # Specifies the port on which the frontend container listens.
           ports:
             - containerPort: 80
+            # Checks whether the frontend component has started successfully.
+          startupProbe:
+                tcpSocket:
+                  port: 80
+                periodSeconds: 5
+                failureThreshold: 12
+            # Checks whether the frontend component accepts connections.
+          readinessProbe:
+                tcpSocket:
+                  port: 80
+                periodSeconds: 5
+            # Checks whether the frontend component is still running, responding and healthy.
+          livenessProbe:
+                tcpSocket:
+                  port: 80
+                periodSeconds: 10

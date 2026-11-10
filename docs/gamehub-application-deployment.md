@@ -2654,3 +2654,128 @@ minikube service frontend-service -n gamehub -p gamehub-cluster
 sequence in this document. Then verify the PVC, PostgreSQL endpoint,
 Auth/Game database connectivity, and actual application workflows. Only
 after those checks should we move on to performance testing with k6.
+
+## 18. Investigation: Frontend Pod Sandbox Changed
+
+**Investigation date:** 09 November 2026  
+**Status:** Pod sandbox recreation confirmed; underlying trigger not yet identified.
+
+### 18.1 Observed Kubernetes Events
+
+While inspecting the frontend Pod using `kubectl describe pod`, the following events were observed:
+
+```text
+Normal  Created         2d17h  kubelet  spec.containers{frontend}: Container created
+Normal  Started         2d17h  kubelet  spec.containers{frontend}: Container started
+
+Normal  SandboxChanged  11m    kubelet  Pod sandbox changed, it will be killed and re-created.
+
+Normal  Pulled          11m    kubelet  spec.initContainers{wait-for-auth-service}: Container image "busybox:1.36" already present on machine and can be accessed by the pod
+Normal  Created         11m    kubelet  spec.initContainers{wait-for-auth-service}: Container created
+Normal  Started         11m    kubelet  spec.initContainers{wait-for-auth-service}: Container started
+
+Normal  Pulled          10m    kubelet  spec.containers{frontend}: Container image "lakshmisaranya/gamehub:frontend-v1" already present on machine and can be accessed by the pod
+Normal  Created         10m    kubelet  spec.containers{frontend}: Container created
+Normal  Started         10m    kubelet  spec.containers{frontend}: Container started
+```
+
+The times above are relative event ages at the time of observation.
+
+### 18.2 What does SandboxChanged mean?
+
+A Pod sandbox provides the environment required by containers in a Pod, including their shared networking context.
+
+The event:
+
+```text
+SandboxChanged
+Pod sandbox changed, it will be killed and re-created.
+```
+
+indicates that kubelet detected that the existing Pod sandbox had changed and needed to be recreated.
+
+When this happens, the containers associated with that sandbox must also be created again.
+
+In our frontend Pod, the following sequence was observed:
+
+1. Kubelet detected a sandbox change.
+2. The previous sandbox was scheduled to be killed and recreated.
+3. The `wait-for-auth-service` init container started again.
+4. The frontend container was created and started again.
+5. The required images were already available locally, so no new image download was necessary.
+
+**Important distinction:** Sandbox recreation does not necessarily mean that the Kubernetes Pod object itself was deleted and recreated. The Pod may retain the same name and UID while its sandbox and containers are recreated.
+
+### 18.3 Does SandboxChanged prove that the PC was restarted?
+
+No.
+
+The event confirms that the Pod sandbox was recreated. It does not identify the underlying trigger.
+
+Possible areas to investigate include:
+
+- Container runtime interruption or recovery.
+- Minikube node or kubelet lifecycle changes.
+- An existing Pod sandbox becoming unavailable or inconsistent.
+- Underlying Docker/WSL environment interruptions.
+
+The event alone does not establish that Windows shut down, entered sleep, or crashed.
+
+### 18.4 Relationship with container restart count and exit code
+
+A sandbox recreation can cause the containers in the Pod to be recreated.
+
+However, the following are different observations:
+
+- Pod sandbox recreation.
+- Container restart count.
+- Container termination exit code.
+- Pod object deletion and replacement.
+
+They should be inspected separately rather than treated as interchangeable.
+
+An exit code such as `255` and a termination reason such as `Unknown` do not independently identify the cause of a sandbox change.
+
+### 18.5 Commands for further investigation
+
+Inspect the frontend Pod and its events:
+
+```powershell
+kubectl describe pod <frontend-pod-name> -n gamehub
+```
+
+Check the Pod identity, node and IP:
+
+```powershell
+kubectl get pod <frontend-pod-name> -n gamehub -o wide
+```
+
+Check all application Pods and restart counts:
+
+```powershell
+kubectl get pods -n gamehub
+```
+
+Inspect node conditions and events:
+
+```powershell
+kubectl describe node gamehub-cluster
+```
+
+### 18.6 Current conclusion
+
+**Confirmed:**
+
+- The frontend Pod experienced a `SandboxChanged` event.
+- Kubelet recreated the Pod sandbox.
+- The frontend init container and frontend application container were subsequently created and started again.
+
+**Not yet confirmed:**
+
+- Whether Docker Desktop, WSL, Minikube, kubelet, or another runtime-level event initiated the sandbox change.
+- Whether this event was caused by a PC sleep, shutdown, restart, or system interruption.
+- Whether the event is related to the earlier November 6 Docker/WSL interruption.
+
+Do not attribute the sandbox recreation to a Windows or Docker shutdown without additional supporting evidence.
+
+**Learning takeaway:** A Pod sandbox is different from a Pod object and from an application container. A sandbox recreation can cause containers to be recreated even when the Pod object itself remains present.

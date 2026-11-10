@@ -37,3 +37,20 @@ spec:
           # Specifies the port on which the Auth application listens inside the container.
           ports:
             - containerPort: 8080
+            # Checks whether the Auth component has started.
+          startupProbe:
+                tcpSocket:
+                  port: 8080
+                periodSeconds: 5
+                failureThreshold: 12  
+            # Checks whether the Auth component accepts connections.
+          readinessProbe:
+                tcpSocket:
+                  port: 8080
+                periodSeconds: 5 
+            # Checks whether the Auth component is still running, responding and healthy.
+          livenessProbe:
+                tcpSocket:
+                  port: 8080
+                periodSeconds: 10
+              
