@@ -1,0 +1,11 @@
+
+# Kubernetes API version for Namespace resources
+apiVersion: v1
+
+# We are creating a Namespace
+kind: Namespace
+
+# Namespace identification details
+metadata:
+  # Separate workspace for our Kubernetes troubleshooting experiments
+  name: k8s-troubleshooting

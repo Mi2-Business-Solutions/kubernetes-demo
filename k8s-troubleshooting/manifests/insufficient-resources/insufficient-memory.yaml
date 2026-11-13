@@ -1,0 +1,65 @@
+
+# Specifies the Kubernetes API version for Deployment resources.
+apiVersion: apps/v1
+
+# Specifies the type of Kubernetes resource we want to create.
+kind: Deployment
+
+# Contains identifying information about the Deployment.
+metadata:
+  # Name of our test Deployment.
+  name: insufficient-memory
+
+  # Creates this Deployment inside our troubleshooting namespace,
+  # keeping it separate from the GameHub application.
+  namespace: k8s-troubleshooting
+
+# Defines the desired state of the Deployment.
+spec:
+  # We need only one Pod for this experiment.
+  replicas: 1
+
+  # Identifies which Pods belong to this Deployment.
+  # These labels must match the labels defined in the Pod template.
+  selector:
+    matchLabels:
+      app: insufficient-memory
+
+  # Defines the configuration of the Pod that the Deployment creates.
+  template:
+    metadata:
+      # Labels assigned to the Pod.
+      # The Deployment uses these labels to identify and manage its Pod.
+      labels:
+        app: insufficient-memory
+
+    # Defines the Pod's specification.
+    spec:
+      containers:
+        # Configuration of the container inside the Pod.
+        - name: memory-test
+
+          # Ubuntu image used to create the container.
+          image: ubuntu
+
+          # Runs a shell command inside the container.
+          # Prints a message every 10 seconds and continues running.
+          command: ["/bin/bash", "-c", "while true; do echo Memory test running; sleep 10; done"]
+
+          # Defines the CPU and memory resources for the container.
+          resources:
+
+            # Minimum resources Kubernetes uses when scheduling the Pod.
+            requests:
+              # Our node has approximately 7.38Gi allocatable memory.
+              # Requesting 8Gi exceeds the node's available capacity.
+              # This should cause the Pod to remain Pending.
+             # memory: "8Gi" This value is intentionally set higher than the node's allocatable memory to simulate insufficient resources.
+              memory: "128Mi" # This value is intentionally set lower than the node's allocatable memory to allow scheduling.
+            # Maximum resources the container is allowed to consume.
+            limits:
+              # Sets the maximum memory limit to 9Gi.
+              # This is a scheduling experiment; the container does not
+              # actually consume 9Gi of memory.
+             # memory: "9Gi" #This value is intentionally set higher than the node's allocatable memory to simulate insufficient resources.
+              memory: "256Mi" # This value is intentionally set lower than the node's allocatable memory to allow scheduling.

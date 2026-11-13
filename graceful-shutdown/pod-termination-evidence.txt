@@ -1,0 +1,26 @@
+Monitoring started: 2026-11-11T12:16:55.8870825+05:30
+2026-11-11T12:16:56.0242349+05:30 POD                                 PHASE     DELETING   CONTAINERS   EXIT-CODE   LAST-EXIT   INIT-CONTAINERS         INIT-EXIT
+2026-11-11T12:16:56.0276003+05:30 auth-deployment-654d79c8b4-lgjmc    Running   <none>     auth         <none>      <none>      <none>                  <none>
+2026-11-11T12:16:56.0362841+05:30 game-deployment-5bd477d5fb-hm2vz    Running   <none>     game         <none>      <none>      <none>                  <none>
+2026-11-11T12:16:56.0469766+05:30 gamehub-frontend-7c49f48bcc-6lq2x   Running   <none>     frontend     <none>      <none>      wait-for-auth-service   0
+2026-11-11T12:16:56.0545335+05:30 postgres-78998c8bcc-26z7r           Running   <none>     postgres     <none>      <none>      <none>                  <none>
+2026-11-11T12:17:43.1331840+05:30 gamehub-frontend-7c49f48bcc-6lq2x   Running   2026-11-11T06:48:13Z   frontend     <none>      <none>      wait-for-auth-service   0
+2026-11-11T12:17:43.1757440+05:30 gamehub-frontend-7c49f48bcc-6lq2x   Running   2026-11-11T06:48:13Z   frontend     <none>      <none>      wait-for-auth-service   0
+2026-11-11T12:17:43.4226852+05:30 gamehub-frontend-7c49f48bcc-6lq2x   Succeeded   2026-11-11T06:48:13Z   frontend     0           <none>      wait-for-auth-service   0
+2026-11-11T12:17:43.7751358+05:30 gamehub-frontend-7c49f48bcc-6lq2x   Succeeded   2026-11-11T06:47:43Z   frontend     0           <none>      wait-for-auth-service   0
+2026-11-11T12:17:43.7835149+05:30 gamehub-frontend-7c49f48bcc-6lq2x   Succeeded   2026-11-11T06:47:43Z   frontend     0           <none>      wait-for-auth-service   0
+2026-11-11T12:18:22.6502516+05:30 game-deployment-5bd477d5fb-hm2vz    Running     2026-11-11T06:48:52Z   game         <none>      <none>      <none>                  <none>
+2026-11-11T12:18:22.6791329+05:30 game-deployment-5bd477d5fb-hm2vz    Running     2026-11-11T06:48:52Z   game         <none>      <none>      <none>                  <none>
+2026-11-11T12:18:23.1708805+05:30 game-deployment-5bd477d5fb-hm2vz    Succeeded   2026-11-11T06:48:52Z   game         0           <none>      <none>                  <none>
+2026-11-11T12:18:23.9035905+05:30 game-deployment-5bd477d5fb-hm2vz    Succeeded   2026-11-11T06:48:23Z   game         0           <none>      <none>                  <none>
+2026-11-11T12:18:23.9153797+05:30 game-deployment-5bd477d5fb-hm2vz    Succeeded   2026-11-11T06:48:23Z   game         0           <none>      <none>                  <none>
+2026-11-11T12:18:56.3040877+05:30 auth-deployment-654d79c8b4-lgjmc    Running     2026-11-11T06:49:26Z   auth         <none>      <none>      <none>                  <none>
+2026-11-11T12:18:56.3362894+05:30 auth-deployment-654d79c8b4-lgjmc    Running     2026-11-11T06:49:26Z   auth         <none>      <none>      <none>                  <none>
+2026-11-11T12:18:56.7161611+05:30 auth-deployment-654d79c8b4-lgjmc    Succeeded   2026-11-11T06:49:26Z   auth         0           <none>      <none>                  <none>
+2026-11-11T12:18:56.9960589+05:30 auth-deployment-654d79c8b4-lgjmc    Succeeded   2026-11-11T06:48:56Z   auth         0           <none>      <none>                  <none>
+2026-11-11T12:18:57.0014272+05:30 auth-deployment-654d79c8b4-lgjmc    Succeeded   2026-11-11T06:48:56Z   auth         0           <none>      <none>                  <none>
+2026-11-11T12:19:21.3934201+05:30 postgres-78998c8bcc-26z7r           Running     2026-11-11T06:49:51Z   postgres     <none>      <none>      <none>                  <none>
+2026-11-11T12:19:21.4246780+05:30 postgres-78998c8bcc-26z7r           Running     2026-11-11T06:49:51Z   postgres     <none>      <none>      <none>                  <none>
+2026-11-11T12:19:21.6856440+05:30 postgres-78998c8bcc-26z7r           Succeeded   2026-11-11T06:49:51Z   postgres     0           <none>      <none>                  <none>
+2026-11-11T12:19:22.0821980+05:30 postgres-78998c8bcc-26z7r           Succeeded   2026-11-11T06:49:22Z   postgres     0           <none>      <none>                  <none>
+2026-11-11T12:19:22.0979086+05:30 postgres-78998c8bcc-26z7r           Succeeded   2026-11-11T06:49:22Z   postgres     0           <none>      <none>                  <none>
