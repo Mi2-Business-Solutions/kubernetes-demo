@@ -7,24 +7,25 @@ frontend served by Nginx.
 Run the commands below in PowerShell from the repository root. These steps use
 the root-level Kubernetes manifests, not Docker Compose.
 
-## 1. Confirm Minikube is the current cluster
+## 1. Start Minikube and select the target profile and context
 
 ```powershell
 cd C:\path\to\Kubernetes-crash-course-2025
 
+minikube start -p gamehub-cluster
+minikube profile gamehub-cluster
+kubectl config use-context gamehub-cluster
+
 minikube profile list
-minikube status
+minikube status -p gamehub-cluster
 kubectl config current-context
 kubectl get nodes
 ```
 
-Make sure `kubectl get nodes` shows the Minikube node as `Ready`. If the
-current context is not the Minikube cluster, switch to its context before
-continuing:
-
-```powershell
-kubectl config use-context <minikube-context-name>
-```
+The Minikube profile selects the cluster for `minikube` commands.
+`kubectl config use-context` selects the cluster for `kubectl` commands.
+Check that `kubectl config current-context` prints `gamehub-cluster` and that
+`kubectl get nodes` shows its Minikube node as `Ready` before continuing.
 
 ## 2. Make sure the application images are available
 
@@ -47,8 +48,7 @@ minikube image load lakshmisaranya/gamehub:game-v1 -p gamehub-cluster
 minikube image load lakshmisaranya/gamehub:frontend-v1 -p gamehub-cluster
 ```
 
-Replace `gamehub-cluster` with the profile name shown by `minikube profile
-list`.
+These commands use the `gamehub-cluster` profile started above.
 
 ## 3. Create the namespace and database resources
 
@@ -110,9 +110,8 @@ kubectl get endpointslices -n gamehub
 minikube service frontend-service -n gamehub -p gamehub-cluster
 ```
 
-Replace `gamehub-cluster` with the actual Minikube profile name. The last
-command opens the frontend in a browser. Try registering and logging in to
-check the app’s database-backed features.
+The last command opens the frontend in a browser. Try registering and logging
+in to check the app’s database-backed features.
 
 ## Troubleshooting
 
