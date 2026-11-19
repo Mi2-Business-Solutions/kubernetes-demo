@@ -1,0 +1,78 @@
+
+# Specifies the Kubernetes API group and version used by this resource.
+apiVersion: apps/v1
+
+# Tells Kubernetes that we want to create a Deployment.
+kind: Deployment
+
+# Contains identifying information about the Deployment.
+metadata:
+
+  # Name of this Deployment.
+  name: gamehub-node-selector
+
+  # Namespace in which Kubernetes should create this Deployment.
+  namespace: k8s-troubleshooting
+
+# Defines the desired state of our Deployment.
+spec:
+
+  # We want Kubernetes to maintain one Pod for this Deployment.
+  replicas: 1
+
+  # Identifies which Pods belong to this Deployment.
+  # The labels here must match the labels in the Pod template below.
+  selector:
+
+    # Uses labels to identify the Deployment's Pods.
+    matchLabels:
+
+      # The Deployment manages Pods having this exact label.
+      app: gamehub-node-selector
+
+  # Defines the template Kubernetes uses to create new Pods.
+  template:
+
+    # Contains metadata for the Pods created by this Deployment.
+    metadata:
+
+      # Labels assigned to each newly created Pod.
+      labels:
+
+        # This label identifies our Pod as part of this application.
+        # It is a Pod label, NOT a Node label.
+        app: gamehub-node-selector
+
+    # Defines how the Pod should run.
+    spec:
+
+      # Specifies the containers that should run inside this Pod.
+      containers:
+
+        # Defines our container.
+        - name: main
+
+          # Uses the Ubuntu image from the container registry.
+          image: ubuntu:24.04
+
+          # Overrides the default command of the Ubuntu container.
+          command:
+
+            # Starts the Bash shell.
+            - /bin/bash
+
+            # Tells Bash to execute the command supplied next.
+            - -c
+
+            # Prints a message every 10 seconds.
+            # The infinite loop keeps the container running.
+            - "while true; do echo GameHub-NodeSelector; sleep 10; done"
+
+      # Scheduling rule: tells Kubernetes which Node can run this Pod.
+      nodeSelector:
+
+        # Kubernetes searches for a Node with the exact label:
+        # mynode=demonode
+        #
+        # If no Node has this label, the Pod cannot be scheduled.
+        mynode: demonode

@@ -1,0 +1,69 @@
+
+# API version used for Kubernetes Deployment resources
+apiVersion: apps/v1
+
+# Resource type
+kind: Deployment
+
+metadata:
+  # Name of our Node Affinity experiment
+  name: gamehub-node-affinity-soft
+
+  # Keep this experiment separate from the actual GameHub application
+  namespace: k8s-troubleshooting
+
+spec:
+  # Maintain one Pod for this experiment
+  replicas: 1
+
+  # Deployment uses this label to identify the Pods it manages
+  selector:
+    matchLabels:
+      app: gamehub-node-affinity-soft
+
+  # Template used by the Deployment to create its Pod
+  template:
+    metadata:
+      labels:
+        # Identifies this experimental application
+        app: gamehub-node-affinity-soft
+
+        # Identifies the purpose of this Pod
+        lab: node-affinity
+
+    spec:
+      # Node Affinity controls which Nodes are eligible
+      # to receive this Pod
+      affinity:
+        nodeAffinity:
+          # Soft scheduling preference:
+          # the Pod prefers to be scheduled on a matching Node,
+          # but can be scheduled on any Node if no match is found.
+          preferredDuringSchedulingIgnoredDuringExecution:
+
+            # The Node should satisfy this matching expression
+            - preference:
+                matchExpressions:
+
+                  # Node should contain the label key "workload"
+                  - key: workload
+
+                    # The label value should be present in the values list
+                    operator: In
+                    values:
+                      - production
+
+              # Weight of this preference (1-100)
+              weight: 80
+      # Container specification for our experimental Pod
+      containers:
+        - name: main
+
+          # Use a pinned Ubuntu image rather than the untagged ubuntu image
+          image: ubuntu:24.04
+
+          # Keep the container running so we can inspect the Pod
+          command:
+            - /bin/bash
+            - -c
+            - "while true; do echo GameHub-NodeAffinity; sleep 10; done"
