@@ -1,0 +1,37 @@
+
+# API version for PersistentVolumeClaim resources.
+# PVC is a core Kubernetes resource, so it uses v1.
+apiVersion: v1
+
+# We are creating a PersistentVolumeClaim (PVC).
+kind: PersistentVolumeClaim
+
+metadata:
+  # A separate name keeps Experiment C independent
+  # of the PVC used in Experiments A and B.
+  name: gamehub-dynamic-pvc
+
+  # Create this PVC inside our troubleshooting namespace.
+  namespace: k8s-troubleshooting
+
+spec:
+  # Request ReadWriteOnce access.
+  # This means the volume can be mounted as read-write
+  # by workloads on one node at a time.
+  accessModes:
+    - ReadWriteOnce
+
+  # Explicitly select the existing "standard" StorageClass.
+  # Its provisioner is k8s.io/minikube-hostpath.
+  #
+  # This is the key difference from Experiment B:
+  # we are asking Kubernetes to provision storage dynamically
+  # instead of manually creating a PersistentVolume.
+  storageClassName: standard
+
+  resources:
+    requests:
+      # Request 1G of storage.
+      # Kubernetes will look for or dynamically provision
+      # a volume that can satisfy this request.
+      storage: 1G

@@ -1,0 +1,104 @@
+
+# ============================================================
+# EXPERIMENT A: Reproduce an Unbound PersistentVolumeClaim
+# ============================================================
+#
+# Objective:
+# Intentionally create a PVC that cannot find suitable storage.
+#
+# Expected result:
+# PVC  -> Pending
+# Pod  -> Pending
+#
+# Important:
+# We are NOT creating a PersistentVolume in this experiment.
+# We are also preventing the default StorageClass from being used.
+#
+# ============================================================
+
+
+# ------------------------------------------------------------
+# RESOURCE 1: PersistentVolumeClaim
+# ------------------------------------------------------------
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+
+metadata:
+  # Name used by the Deployment to reference this claim.
+  name: gamehub-unbound-pvc
+
+  # Keep this experiment isolated from the GameHub application.
+  namespace: k8s-troubleshooting
+
+spec:
+
+  # The application needs read-write access to the volume.
+  # ReadWriteOnce means read-write mounting by a single node.
+  accessModes:
+    - ReadWriteOnce
+
+  # Explicitly request storage WITHOUT a StorageClass.
+  #
+  # "" is different from omitting this field.
+  #
+  # Empty string:
+  # - Does not use the default StorageClass.
+  # - Requires a suitable PV without a StorageClass.
+  # - Does not trigger StorageClass-based dynamic provisioning.
+  storageClassName: ""
+
+  # Application storage requirement.
+  resources:
+    requests:
+      storage: 1G
+
+
+---
+# ------------------------------------------------------------
+# RESOURCE 2: Deployment
+# ------------------------------------------------------------
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: gamehub-storage-test
+  namespace: k8s-troubleshooting
+
+spec:
+
+  # We need only one Pod to reproduce the issue.
+  replicas: 1
+
+  # The Deployment uses this label to identify its Pods.
+  selector:
+    matchLabels:
+      app: gamehub-storage-test
+
+  template:
+    metadata:
+      labels:
+        app: gamehub-storage-test
+
+    spec:
+
+      containers:
+        - name: nginx
+
+          # Simple test application.
+          # We don't need to build a custom image.
+          image: nginx:latest
+
+          # Mount the PVC inside the container.
+          volumeMounts:
+            - name: application-storage
+
+              # Mount location inside the nginx container.
+              mountPath: /usr/share/nginx/html
+
+      # Connect the Pod to the PVC created above.
+      volumes:
+        - name: application-storage
+          persistentVolumeClaim:
+            claimName: gamehub-unbound-pvc

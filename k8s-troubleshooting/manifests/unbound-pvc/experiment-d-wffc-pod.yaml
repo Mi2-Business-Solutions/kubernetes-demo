@@ -1,0 +1,78 @@
+
+# Experiment D: Pod that consumes the WaitForFirstConsumer PVC
+#
+# Purpose:
+# Create a Pod that references our existing PVC.
+# This gives Kubernetes a workload that needs the requested storage.
+#
+# Expected behaviour:
+# Kubernetes can now coordinate Pod scheduling with
+# dynamic volume provisioning and binding.
+
+# --------------------------------------------------
+# 1. API version
+# --------------------------------------------------
+
+# Pods are core Kubernetes resources.
+# Core resources use the "v1" API version.
+apiVersion: v1
+
+# --------------------------------------------------
+# 2. Resource type
+# --------------------------------------------------
+
+# We are creating a standalone Pod.
+kind: Pod
+
+# --------------------------------------------------
+# 3. Pod metadata
+# --------------------------------------------------
+
+metadata:
+  # A unique name for this Pod within its namespace.
+  name: gamehub-wffc-pod
+
+  # Create this Pod in our troubleshooting namespace.
+  # The PVC it references is also in this namespace.
+  namespace: k8s-troubleshooting
+
+# --------------------------------------------------
+# 4. Pod specification
+# --------------------------------------------------
+
+spec:
+
+  # Containers are the application workloads running inside a Pod.
+  containers:
+
+    # Name of the container inside this Pod.
+    - name: nginx
+
+      # Container image to run.
+      # Kubernetes will use the Nginx image from its registry.
+      image: nginx
+
+      # volumeMounts tells the container where to access
+      # the storage made available to this Pod.
+      volumeMounts:
+
+        # This is the name of the volume declared below.
+        # It connects this container mount to that Pod volume.
+        - name: gamehub-storage
+
+          # The storage will be mounted at /data inside the container.
+          # We are not writing or testing any files in this experiment.
+          mountPath: /data
+
+  # volumes declares the storage resources available to this Pod.
+  volumes:
+
+    # This volume name must match the name used in volumeMounts.
+    - name: gamehub-storage
+
+      # Tell Kubernetes that this volume must come from a PVC.
+      persistentVolumeClaim:
+
+        # Reference the PVC we created earlier.
+        # This is the connection between the Pod and the PVC.
+        claimName: gamehub-wffc-pvc

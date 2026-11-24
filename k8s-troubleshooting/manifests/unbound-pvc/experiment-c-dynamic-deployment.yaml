@@ -1,0 +1,52 @@
+
+# Use the apps API group for Deployment resources.
+apiVersion: apps/v1
+
+# We are creating a Deployment to manage our test Pod.
+kind: Deployment
+
+metadata:
+  # A separate Deployment for Experiment C.
+  name: gamehub-dynamic-storage-test
+
+  # Keep this experiment inside our troubleshooting namespace.
+  namespace: k8s-troubleshooting
+
+spec:
+  # Run one replica of our test application.
+  replicas: 1
+
+  # The Deployment uses this selector to identify its Pods.
+  selector:
+    matchLabels:
+      app: gamehub-dynamic-storage-test
+
+  # This template defines how the Pod should be created.
+  template:
+    metadata:
+      labels:
+        # This label must match the selector above.
+        app: gamehub-dynamic-storage-test
+
+    spec:
+      containers:
+        - name: nginx
+
+          # Nginx is our lightweight test container.
+          image: nginx
+
+          # Mount the requested storage inside the container.
+          volumeMounts:
+            - name: dynamic-storage
+
+              # This directory will contain the mounted volume.
+              # We will use it to test writing and reading data.
+              mountPath: /usr/share/nginx/html/data
+
+      # Define the volumes available to this Pod.
+      volumes:
+        - name: dynamic-storage
+
+          # Reference the PVC created in Experiment C.
+          persistentVolumeClaim:
+            claimName: gamehub-dynamic-pvc

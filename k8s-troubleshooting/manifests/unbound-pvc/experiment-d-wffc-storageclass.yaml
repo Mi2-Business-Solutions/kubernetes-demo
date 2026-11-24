@@ -1,0 +1,17 @@
+# A separate StorageClass for Experiment D.
+# It uses the same Minikube provisioner as "standard",
+# but delays volume binding until a Pod consumes the PVC.
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gamehub-wffc
+
+# Use Minikube's existing hostpath provisioner.
+provisioner: k8s.io/minikube-hostpath
+
+# Delay volume binding until a Pod uses the PVC.
+volumeBindingMode: WaitForFirstConsumer
+
+# Match the reclaim policy of Minikube's standard class.
+reclaimPolicy: Delete

@@ -1,0 +1,18 @@
+# PVC for Experiment D
+# Requests 1Gi of storage using our WaitForFirstConsumer StorageClass.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gamehub-wffc-pvc
+  namespace: k8s-troubleshooting
+
+spec:
+  accessModes:
+    - ReadWriteOnce
+
+  storageClassName: gamehub-wffc
+
+  resources:
+    requests:
+      storage: 1G

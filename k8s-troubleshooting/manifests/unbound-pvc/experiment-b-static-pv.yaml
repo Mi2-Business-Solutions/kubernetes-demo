@@ -1,0 +1,40 @@
+
+# API version used to create a PersistentVolume.
+apiVersion: v1
+
+# Resource type: PersistentVolume (PV).
+kind: PersistentVolume
+
+metadata:
+  # Unique name of this PV across the entire Kubernetes cluster.
+  name: gamehub-static-pv
+
+spec:
+  # Storage capacity offered by this PV.
+  # Our existing PVC requests 1G, so this PV offers 1G.
+  capacity:
+    storage: 1G
+
+  # Access mode supported by this volume.
+  # ReadWriteOnce means the volume can be mounted as read-write
+  # by workloads on one node at a time.
+  accessModes:
+    - ReadWriteOnce
+
+  # Retain means Kubernetes will preserve the underlying storage
+  # when the PVC is deleted. Manual cleanup may be required.
+  persistentVolumeReclaimPolicy: Retain
+
+  # Explicitly set StorageClass to empty.
+  # Our existing PVC also has storageClassName: "".
+  # Both values must match for this binding.
+  storageClassName: ""
+
+  # hostPath uses a directory from the Minikube node's filesystem.
+  # This is suitable for our single-node learning experiment.
+  hostPath:
+    # Directory inside the Minikube node where data will be stored.
+    path: /mnt/data/gamehub-static-storage
+
+    # Create the directory automatically if it does not exist.
+    type: DirectoryOrCreate
